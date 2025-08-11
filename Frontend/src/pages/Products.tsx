@@ -1,107 +1,112 @@
 import { motion } from "framer-motion";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import Navigation from "@/components/Navigation";
 import ProductCard from "@/components/ProductCard";
+import { productAPI } from "@/lib/api";
 
-const categories = ["All", "Photography", "Tools", "Electronics", "Audio", "Sports", "Home"];
-
-const allProducts = [
-  {
-    id: 1,
-    name: "Professional Camera Kit",
-    price: 6500, // Professional camera kit rental per day
-    image: "https://images.unsplash.com/photo-1502920917128-1aa500764cbd?w=300&h=200&fit=crop",
-    available: true,
-    category: "Photography"
-  },
-  {
-    id: 2,
-    name: "Power Drill Set",
-    price: 1800, // Power tools rental per day
-    image: "https://images.unsplash.com/photo-1504148455328-c376907d081c?w=300&h=200&fit=crop",
-    available: true,
-    category: "Tools"
-  },
-  {
-    id: 3,
-    name: "Gaming Laptop",
-    price: 8500, // High-end laptop rental per day
-    image: "https://images.unsplash.com/photo-1603302576837-37561b2e2302?w=300&h=200&fit=crop",
-    available: false,
-    category: "Electronics"
-  },
-  {
-    id: 4,
-    name: "DJ Mixer",
-    price: 7200, // Professional DJ equipment per day
-    image: "https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=300&h=200&fit=crop",
-    available: true,
-    category: "Audio"
-  },
-  {
-    id: 5,
-    name: "DSLR Camera",
-    price: 4800, // DSLR camera rental per day
-    image: "https://images.unsplash.com/photo-1606983340126-99ab4feaa64a?w=300&h=200&fit=crop",
-    available: true,
-    category: "Photography"
-  },
-  {
-    id: 6,
-    name: "Circular Saw",
-    price: 2500, // Construction tools per day
-    image: "https://images.unsplash.com/photo-1589998059171-988d887df646?w=300&h=200&fit=crop",
-    available: true,
-    category: "Tools"
-  },
-  {
-    id: 7,
-    name: "MacBook Pro",
-    price: 12000, // Premium laptop rental per day
-    image: "https://images.unsplash.com/photo-1541807084-5c52b6b3adef?w=300&h=200&fit=crop",
-    available: true,
-    category: "Electronics"
-  },
-  {
-    id: 8,
-    name: "Studio Monitors",
-    price: 3200, // Professional audio equipment per day
-    image: "https://images.unsplash.com/photo-1558618047-3c8c76ca7d13?w=300&h=200&fit=crop",
-    available: false,
-    category: "Audio"
-  },
-  {
-    id: 9,
-    name: "Tennis Racket Set",
-    price: 1200, // Sports equipment per day
-    image: "https://images.unsplash.com/photo-1551698618-1dfe5d97d256?w=300&h=200&fit=crop",
-    available: true,
-    category: "Sports"
-  },
-  {
-    id: 10,
-    name: "Pressure Washer",
-    price: 2800, // Home cleaning equipment per day
-    image: "https://images.unsplash.com/photo-1558618047-3c8c76ca7d13?w=300&h=200&fit=crop",
-    available: true,
-    category: "Home"
-  }
-];
+interface Product {
+  id: string;
+  name: string;
+  pricePerDay: number;
+  imageUrl: string;
+  isAvailable: boolean;
+  category: string;
+  description?: string;
+}
 
 const Products = () => {
-  const [selectedCategory, setSelectedCategory] = useState("All");
+  const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState("");
+  const [selectedCategory, setSelectedCategory] = useState("All");
+  const [products, setProducts] = useState<Product[]>([]);
+  const [categories, setCategories] = useState<string[]>(["All"]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  const filteredProducts = allProducts.filter(product => {
+  // Load products and categories
+  useEffect(() => {
+    const loadData = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+
+        // Load categories
+        const categoriesResponse = await productAPI.getCategories();
+        if (categoriesResponse.success) {
+          setCategories(["All", ...categoriesResponse.data]);
+        }
+
+        // Load products
+        const params: any = {};
+        if (selectedCategory !== "All") params.category = selectedCategory;
+        if (searchTerm) params.search = searchTerm;
+        
+        const productsResponse = await productAPI.getProducts(params);
+        if (productsResponse.success) {
+          setProducts(productsResponse.data.products || []);
+        }
+      } catch (err) {
+        console.error('Error loading data:', err);
+        setError('Failed to load products. Please try again.');
+        // Fallback to local data if API fails
+        setProducts([]);
+        setCategories(["All", "Photography", "Tools", "Electronics", "Audio", "Sports", "Home"]);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadData();
+  }, [selectedCategory, searchTerm]);
+
+  const handleRentProduct = (productId: string) => {
+    navigate(`/product/${productId}`);
+  };
+
+  const handleViewProduct = (productId: string) => {
+    navigate(`/product/${productId}`);
+  };
+
+  // Filter products based on search and category
+  const filteredProducts = products.filter(product => {
+    const matchesSearch = product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         (product.description && product.description.toLowerCase().includes(searchTerm.toLowerCase()));
     const matchesCategory = selectedCategory === "All" || product.category === selectedCategory;
-    const matchesSearch = product.name.toLowerCase().includes(searchTerm.toLowerCase());
-    return matchesCategory && matchesSearch;
+    return matchesSearch && matchesCategory;
   });
 
-  const handleRentProduct = (productId: number) => {
-    console.log(`Adding product ${productId} to cart`);
-    // In real app, navigate to product details or add to cart
-  };
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-800">
+        <Navigation />
+        <div className="container mx-auto px-4 pt-24">
+          <div className="flex justify-center items-center h-64">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-400"></div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-800">
+        <Navigation />
+        <div className="container mx-auto px-4 pt-24">
+          <div className="text-center">
+            <div className="text-red-400 text-lg mb-4">{error}</div>
+            <button 
+              onClick={() => window.location.reload()} 
+              className="px-6 py-3 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors"
+            >
+              Try Again
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-background p-4">
@@ -168,7 +173,7 @@ const Products = () => {
 
             <div className="mt-4 flex items-center justify-between text-sm text-muted-foreground">
               <span>Showing {filteredProducts.length} products</span>
-              <span>{filteredProducts.filter(p => p.available).length} available</span>
+              <span>{filteredProducts.filter(p => p.isAvailable).length} available</span>
             </div>
           </motion.div>
 
@@ -184,25 +189,44 @@ const Products = () => {
                 key={product.id}
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.5 + (index * 0.1) }}
+                transition={{ delay: 0.1 * index }}
               >
-                <ProductCard 
-                  product={product} 
-                  onRent={handleRentProduct}
+                <ProductCard
+                  id={product.id}
+                  name={product.name}
+                  price={product.pricePerDay}
+                  image={product.imageUrl}
+                  available={product.isAvailable}
+                  onRent={() => handleRentProduct(product.id)}
+                  onView={() => handleViewProduct(product.id)}
                 />
               </motion.div>
             ))}
           </motion.div>
 
-          {filteredProducts.length === 0 && (
+          {/* Empty State */}
+          {filteredProducts.length === 0 && !loading && (
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
-              className="neu-card p-12 text-center"
+              className="text-center py-12"
             >
-              <div className="text-4xl mb-4">🔍</div>
+              <div className="text-6xl mb-4">🔍</div>
               <h3 className="text-xl font-semibold text-foreground mb-2">No products found</h3>
-              <p className="text-muted-foreground">Try adjusting your search or filter criteria</p>
+              <p className="text-muted-foreground mb-4">
+                Try adjusting your search terms or selected category.
+              </p>
+              <motion.button
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                className="neu-button px-6 py-3 text-foreground hover:text-primary"
+                onClick={() => {
+                  setSearchTerm("");
+                  setSelectedCategory("All");
+                }}
+              >
+                Clear filters
+              </motion.button>
             </motion.div>
           )}
         </motion.div>
