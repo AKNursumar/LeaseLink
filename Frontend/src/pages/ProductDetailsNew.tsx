@@ -1,7 +1,6 @@
 import { motion } from "framer-motion";
 import { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { useAuth } from "@/contexts/AuthContext";
 import Navigation from "@/components/Navigation";
 
 // Product data that matches the Products page
@@ -343,7 +342,6 @@ const allProducts = [
 const ProductDetails = () => {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { isAuthenticated } = useAuth();
   const [selectedImage, setSelectedImage] = useState(0);
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
@@ -387,10 +385,6 @@ const ProductDetails = () => {
   };
 
   const handleAddToCart = () => {
-    if (!isAuthenticated) {
-      navigate("/login");
-      return;
-    }
     if (!startDate || !endDate) {
       alert("Please select rental dates");
       return;
@@ -440,10 +434,6 @@ const ProductDetails = () => {
   };
 
   const handleRentNow = () => {
-    if (!isAuthenticated) {
-      navigate("/login");
-      return;
-    }
     if (!startDate || !endDate) {
       alert("Please select rental dates");
       return;

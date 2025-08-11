@@ -10,9 +10,11 @@ import morgan from 'morgan';
 import rateLimit from 'express-rate-limit';
 
 // Import routes
-import authRoutes from './routes/auth';
-import userRoutes from './routes/user';
+import authRoutes from './routes/auth-dev'; // Using development auth routes
+import userRoutes from './routes/user-dev'; // Using development user routes
 import healthRoutes from './routes/health';
+import productRoutes from './routes/products';
+import rentalRoutes from './routes/rentals';
 
 const app = express();
 const PORT = process.env.PORT || 4000;
@@ -52,6 +54,8 @@ app.use(express.urlencoded({ extended: true }));
 app.use('/api/health', healthRoutes);
 app.use('/api/auth', authRoutes);
 app.use('/api/users', userRoutes);
+app.use('/api/products', productRoutes);
+app.use('/api/rentals', rentalRoutes);
 
 // Default route
 app.get('/api', (req, res) => {

@@ -4,6 +4,8 @@ import { APP_INTERCEPTOR, APP_GUARD } from '@nestjs/core';
 import { PrismaModule } from '../prisma/prisma.module';
 import { AuthModule } from './auth/auth.module';
 import { UserModule } from './user/user.module';
+import { ProductModule } from './product/product.module';
+import { RentalModule } from './rental/rental.module';
 import { HealthController } from './health/health.controller';
 import { ResponseInterceptor } from '../common/response.interceptor';
 import { RolesGuard } from '../guards/roles.guard';
@@ -14,6 +16,8 @@ import { RolesGuard } from '../guards/roles.guard';
     PrismaModule,
     AuthModule,
     UserModule,
+    ProductModule,
+    RentalModule,
   ],
   controllers: [HealthController],
   providers: [
