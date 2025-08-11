@@ -10,8 +10,8 @@ import morgan from 'morgan';
 import rateLimit from 'express-rate-limit';
 
 // Import routes
-import authRoutes from './routes/auth-dev'; // Using development auth routes
-import userRoutes from './routes/user-dev'; // Using development user routes
+import authRoutes from './routes/auth'; // Using production auth routes with Supabase
+import userRoutes from './routes/user'; // Using production user routes
 import healthRoutes from './routes/health';
 import productRoutes from './routes/products';
 import rentalRoutes from './routes/rentals';

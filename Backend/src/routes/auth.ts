@@ -178,4 +178,28 @@ router.post('/logout', (req: Request, res: Response) => {
   });
 });
 
+// Test endpoint to check users (for development only)
+router.get('/test-users', async (req: Request, res: Response) => {
+  try {
+    const supabase = supabaseService.getClient();
+    const { data: users, error } = await supabase
+      .from('users')
+      .select('id, email, full_name, role, created_at')
+      .limit(10);
+
+    if (error) {
+      return res.status(500).json({ error: error.message });
+    }
+
+    res.json({
+      message: 'Users retrieved successfully',
+      count: users?.length || 0,
+      users: users || []
+    });
+  } catch (error) {
+    console.error('Test users error:', error);
+    res.status(500).json({ error: 'Failed to retrieve users' });
+  }
+});
+
 export default router;

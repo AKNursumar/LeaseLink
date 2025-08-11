@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Supabase Direct Test</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.3/dist/umd/supabase.min.js"></script>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; max-width: 800px; margin: 0 auto; }
+        .test-section { margin: 20px 0; padding: 15px; border: 1px solid #ddd; border-radius: 5px; }
+        button { padding: 10px 15px; margin: 5px; background: #007bff; color: white; border: none; border-radius: 3px; cursor: pointer; }
+        button:hover { background: #0056b3; }
+        .result { margin-top: 10px; padding: 10px; background: #f8f9fa; border-radius: 3px; white-space: pre-wrap; }
+        input { padding: 8px; margin: 5px; border: 1px solid #ddd; border-radius: 3px; width: 200px; }
+    </style>
+</head>
+<body>
+    <h1>Direct Supabase Client Test</h1>
+    
+    <div class="test-section">
+        <h3>1. Initialize Supabase Client</h3>
+        <button onclick="initSupabase()">Initialize Client</button>
+        <div id="init-result" class="result"></div>
+    </div>
+
+    <div class="test-section">
+        <h3>2. Test Registration (Direct to Supabase)</h3>
+        <input type="email" id="reg-email" placeholder="Email" value="directtest@example.com">
+        <input type="password" id="reg-password" placeholder="Password" value="password123">
+        <input type="text" id="reg-name" placeholder="Full Name" value="Direct Test User">
+        <button onclick="testDirectRegistration()">Register Direct</button>
+        <div id="direct-reg-result" class="result"></div>
+    </div>
+
+    <div class="test-section">
+        <h3>3. Test Login (Direct to Supabase)</h3>
+        <input type="email" id="login-email" placeholder="Email" value="directtest@example.com">
+        <input type="password" id="login-password" placeholder="Password" value="password123">
+        <button onclick="testDirectLogin()">Login Direct</button>
+        <div id="direct-login-result" class="result"></div>
+    </div>
+
+    <div class="test-section">
+        <h3>4. Get Current Session</h3>
+        <button onclick="getCurrentSession()">Get Session</button>
+        <div id="session-result" class="result"></div>
+    </div>
+
+    <script>
+        let supabase;
+        
+        function initSupabase() {
+            const result = document.getElementById('init-result');
+            result.textContent = 'Initializing...';
+            
+            try {
+                const supabaseUrl = 'https://cigetcvhprnhxybhjrzm.supabase.co';
+                const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNpZ2V0Y3ZocHJuaHh5YmhqcnptIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTQ5MDY5OTksImV4cCI6MjA3MDQ4Mjk5OX0.GjaRc2cU3Iuqq6bq7Jp-ej2XTm-2QSxTZKAMK4RF8mI';
+                
+                supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
+                
+                result.textContent = `✅ Supabase client initialized successfully!\nURL: ${supabaseUrl}\nKey: ${supabaseKey.substring(0, 20)}...`;
+            } catch (error) {
+                result.textContent = `❌ Error: ${error.message}`;
+            }
+        }
+
+        async function testDirectRegistration() {
+            const result = document.getElementById('direct-reg-result');
+            const email = document.getElementById('reg-email').value;
+            const password = document.getElementById('reg-password').value;
+            const fullName = document.getElementById('reg-name').value;
+            
+            result.textContent = 'Registering...';
+            
+            if (!supabase) {
+                result.textContent = '❌ Please initialize Supabase client first';
+                return;
+            }
+            
+            try {
+                const { data, error } = await supabase.auth.signUp({
+                    email: email,
+                    password: password,
+                    options: {
+                        data: {
+                            full_name: fullName,
+                        }
+                    }
+                });
+                
+                if (error) {
+                    result.textContent = `❌ Registration Error: ${error.message}`;
+                } else {
+                    result.textContent = `✅ Registration successful!\nUser ID: ${data.user?.id}\nEmail: ${data.user?.email}\nConfirmed: ${data.user?.email_confirmed_at ? 'Yes' : 'No'}\nSession: ${data.session ? 'Created' : 'None'}`;
+                }
+            } catch (error) {
+                result.textContent = `❌ Error: ${error.message}`;
+            }
+        }
+
+        async function testDirectLogin() {
+            const result = document.getElementById('direct-login-result');
+            const email = document.getElementById('login-email').value;
+            const password = document.getElementById('login-password').value;
+            
+            result.textContent = 'Logging in...';
+            
+            if (!supabase) {
+                result.textContent = '❌ Please initialize Supabase client first';
+                return;
+            }
+            
+            try {
+                const { data, error } = await supabase.auth.signInWithPassword({
+                    email: email,
+                    password: password
+                });
+                
+                if (error) {
+                    result.textContent = `❌ Login Error: ${error.message}`;
+                } else {
+                    result.textContent = `✅ Login successful!\nUser ID: ${data.user?.id}\nEmail: ${data.user?.email}\nAccess Token: ${data.session?.access_token?.substring(0, 30)}...`;
+                }
+            } catch (error) {
+                result.textContent = `❌ Error: ${error.message}`;
+            }
+        }
+
+        async function getCurrentSession() {
+            const result = document.getElementById('session-result');
+            result.textContent = 'Checking session...';
+            
+            if (!supabase) {
+                result.textContent = '❌ Please initialize Supabase client first';
+                return;
+            }
+            
+            try {
+                const { data: { session } } = await supabase.auth.getSession();
+                
+                if (session) {
+                    result.textContent = `✅ Active session found!\nUser: ${session.user.email}\nToken expires: ${new Date(session.expires_at * 1000).toLocaleString()}`;
+                } else {
+                    result.textContent = '❌ No active session';
+                }
+            } catch (error) {
+                result.textContent = `❌ Error: ${error.message}`;
+            }
+        }
+
+        // Auto-initialize when page loads
+        window.onload = () => {
+            initSupabase();
+        };
+    </script>
+</body>
+</html>

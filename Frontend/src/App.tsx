@@ -5,6 +5,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { SupabaseAuthProvider } from "@/contexts/SupabaseAuthContext";
+import { WorkingAuthProvider } from "@/contexts/WorkingAuthContext";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import DebugAuth from "@/components/DebugAuth";
 import Index from "./pages/Index";
@@ -21,23 +22,30 @@ import Cart from "./pages/Cart";
 import Checkout from "./pages/Checkout";
 import NotFound from "./pages/NotFound";
 import AmbientBackground from "@/components/AmbientBackground";
+import SupabaseTest from "@/components/SupabaseTest";
+import FreshAuth from "@/components/FreshAuth";
+import WorkingLogin from "@/pages/WorkingLogin";
 
 const queryClient = new QueryClient();
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
-    <SupabaseAuthProvider>
-      <AuthProvider>
-        <TooltipProvider>
-          <Toaster />
-          <Sonner />
-          <BrowserRouter>
-          <AmbientBackground />
-          <Routes>
+    <WorkingAuthProvider>
+      <SupabaseAuthProvider>
+        <AuthProvider>
+          <TooltipProvider>
+            <Toaster />
+            <Sonner />
+            <BrowserRouter>
+            <AmbientBackground />
+            <Routes>
             <Route path="/" element={<Index />} />
             <Route path="/login" element={<Login />} />
             <Route path="/signup" element={<SignUp />} />
             <Route path="/login-supabase" element={<LoginWithSupabase />} />
+            <Route path="/test-supabase" element={<SupabaseTest />} />
+            <Route path="/fresh-auth" element={<FreshAuth />} />
+            <Route path="/working-login" element={<WorkingLogin />} />
             <Route path="/signup-supabase" element={<SignUpWithSupabase />} />
             <Route 
               path="/dashboard" 
@@ -115,6 +123,7 @@ const App = () => (
       </TooltipProvider>
     </AuthProvider>
   </SupabaseAuthProvider>
+  </WorkingAuthProvider>
   </QueryClientProvider>
 );
 

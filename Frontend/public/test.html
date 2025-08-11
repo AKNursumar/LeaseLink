@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Backend Test</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; max-width: 800px; margin: 0 auto; }
+        .test-section { margin: 20px 0; padding: 15px; border: 1px solid #ddd; border-radius: 5px; }
+        button { padding: 10px 15px; margin: 5px; background: #007bff; color: white; border: none; border-radius: 3px; cursor: pointer; }
+        button:hover { background: #0056b3; }
+        .result { margin-top: 10px; padding: 10px; background: #f8f9fa; border-radius: 3px; white-space: pre-wrap; }
+        input { padding: 8px; margin: 5px; border: 1px solid #ddd; border-radius: 3px; width: 200px; }
+    </style>
+</head>
+<body>
+    <h1>Direct Backend Test</h1>
+    
+    <div class="test-section">
+        <h3>1. Test Backend Connection</h3>
+        <button onclick="testBackend()">Test Connection</button>
+        <div id="connection-result" class="result"></div>
+    </div>
+
+    <div class="test-section">
+        <h3>2. Test Supabase Connection</h3>
+        <button onclick="testSupabase()">Test Supabase</button>
+        <div id="supabase-result" class="result"></div>
+    </div>
+
+    <div class="test-section">
+        <h3>3. Test Registration</h3>
+        <input type="email" id="reg-email" placeholder="Email" value="test@example.com">
+        <input type="password" id="reg-password" placeholder="Password" value="password123">
+        <input type="text" id="reg-name" placeholder="Full Name" value="Test User">
+        <button onclick="testRegister()">Register</button>
+        <div id="register-result" class="result"></div>
+    </div>
+
+    <div class="test-section">
+        <h3>4. Test Login</h3>
+        <input type="email" id="login-email" placeholder="Email" value="test@example.com">
+        <input type="password" id="login-password" placeholder="Password" value="password123">
+        <button onclick="testLogin()">Login</button>
+        <div id="login-result" class="result"></div>
+    </div>
+
+    <script>
+        const API_BASE = 'http://localhost:4000';
+
+        async function testBackend() {
+            const result = document.getElementById('connection-result');
+            result.textContent = 'Testing...';
+            
+            try {
+                const response = await fetch(`${API_BASE}/api/test`);
+                const data = await response.json();
+                result.textContent = `✅ Success!\n${JSON.stringify(data, null, 2)}`;
+            } catch (error) {
+                result.textContent = `❌ Error: ${error.message}`;
+            }
+        }
+
+        async function testSupabase() {
+            const result = document.getElementById('supabase-result');
+            result.textContent = 'Testing Supabase...';
+            
+            try {
+                const response = await fetch(`${API_BASE}/api/test-supabase`);
+                const data = await response.json();
+                result.textContent = `✅ Supabase Test Result:\n${JSON.stringify(data, null, 2)}`;
+            } catch (error) {
+                result.textContent = `❌ Error: ${error.message}`;
+            }
+        }
+
+        async function testRegister() {
+            const result = document.getElementById('register-result');
+            const email = document.getElementById('reg-email').value;
+            const password = document.getElementById('reg-password').value;
+            const fullName = document.getElementById('reg-name').value;
+            
+            result.textContent = 'Registering...';
+            
+            try {
+                const response = await fetch(`${API_BASE}/api/auth/register`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ email, password, fullName })
+                });
+                
+                const data = await response.json();
+                result.textContent = `${data.success ? '✅' : '❌'} Registration Result:\n${JSON.stringify(data, null, 2)}`;
+            } catch (error) {
+                result.textContent = `❌ Error: ${error.message}`;
+            }
+        }
+
+        async function testLogin() {
+            const result = document.getElementById('login-result');
+            const email = document.getElementById('login-email').value;
+            const password = document.getElementById('login-password').value;
+            
+            result.textContent = 'Logging in...';
+            
+            try {
+                const response = await fetch(`${API_BASE}/api/auth/login`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ email, password })
+                });
+                
+                const data = await response.json();
+                result.textContent = `${data.success ? '✅' : '❌'} Login Result:\n${JSON.stringify(data, null, 2)}`;
+            } catch (error) {
+                result.textContent = `❌ Error: ${error.message}`;
+            }
+        }
+    </script>
+</body>
+</html>
