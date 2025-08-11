@@ -1,6 +1,7 @@
 import { motion } from "framer-motion";
 import { useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
+import { useAuth } from "@/contexts/AuthContext";
 import Navigation from "@/components/Navigation";
 
 // Mock product data - in real app, fetch by ID
@@ -40,6 +41,7 @@ const mockProduct = {
 const ProductDetails = () => {
   const { id } = useParams();
   const navigate = useNavigate();
+  const { isAuthenticated } = useAuth();
   const [selectedImage, setSelectedImage] = useState(0);
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
@@ -54,6 +56,10 @@ const ProductDetails = () => {
   };
 
   const handleAddToCart = () => {
+    if (!isAuthenticated) {
+      navigate("/login");
+      return;
+    }
     if (!startDate || !endDate) {
       alert("Please select rental dates");
       return;
@@ -70,6 +76,10 @@ const ProductDetails = () => {
   };
 
   const handleRentNow = () => {
+    if (!isAuthenticated) {
+      navigate("/login");
+      return;
+    }
     if (!startDate || !endDate) {
       alert("Please select rental dates");
       return;

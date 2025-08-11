@@ -46,7 +46,7 @@ const Index = () => {
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.6, duration: 0.6 }}
         >
-          <Card className="cursor-pointer hover:shadow-lg transition-shadow" onClick={() => isAuthenticated ? navigate('/products') : navigate('/login')}>
+          <Card className="cursor-pointer hover:shadow-lg transition-shadow" onClick={() => navigate('/products')}>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <span className="text-2xl">🏠</span>

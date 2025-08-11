@@ -1,5 +1,6 @@
 import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "@/contexts/AuthContext";
 
 interface Product {
   id: number;
@@ -17,9 +18,21 @@ interface ProductCardProps {
 
 const ProductCard = ({ product, onRent }: ProductCardProps) => {
   const navigate = useNavigate();
+  const { isAuthenticated } = useAuth();
 
   const handleViewDetails = () => {
     navigate(`/product/${product.id}`);
+  };
+
+  const handleRentAction = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (!isAuthenticated) {
+      navigate("/login");
+      return;
+    }
+    if (product.available) {
+      onRent?.(product.id);
+    }
   };
   return (
     <motion.div
@@ -66,13 +79,10 @@ const ProductCard = ({ product, onRent }: ProductCardProps) => {
             ? 'text-foreground hover:text-primary-foreground hover:bg-primary' 
             : 'text-muted-foreground cursor-not-allowed opacity-50'
         }`}
-        onClick={(e) => {
-          e.stopPropagation();
-          if (product.available) onRent?.(product.id);
-        }}
+        onClick={handleRentAction}
         disabled={!product.available}
       >
-        {product.available ? 'Rent Now' : 'Unavailable'}
+        {product.available ? (isAuthenticated ? 'Rent Now' : 'Login to Rent') : 'Unavailable'}
       </motion.button>
     </motion.div>
   );
